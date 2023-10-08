@@ -48,12 +48,12 @@ export class UsersService {
           },
         });
 
+        if (!user) {
+            throw new NotFoundException('User not found');
+        }
+
         if (user.type == 'administrator') {
             throw new UnauthorizedException('You should login by the admin area');
-        }
-    
-        if (!user) {
-          throw new NotFoundException('User not found');
         }
     
         const isPasswordValid = await bcrypt.compare(password, user.password);
@@ -62,7 +62,7 @@ export class UsersService {
           throw new UnauthorizedException('Invalid password');
         }
     
-        return "Usuário Autenticado!";
+        return "User Auth Completed!";
     }
 
     async loginAdmin(loginData: LoginUserDto) {
@@ -74,18 +74,19 @@ export class UsersService {
           },
         });
 
+        if (!user) {
+            throw new NotFoundException('User not found');
+        }
+      
         if (user.type == 'administrator') {
-            if (!user) {
-                throw new NotFoundException('User not found');
-              }
-          
+
               const isPasswordValid = await bcrypt.compare(password, user.password);
           
               if (!isPasswordValid) {
                 throw new UnauthorizedException('Invalid password');
               }
           
-              return "User Auth Completed!";
+              return "Admin Auth Completed!";
         }
         
         return "You don't have permission to access this area";
