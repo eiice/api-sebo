@@ -41,7 +41,7 @@ export class UsersService {
 
     async login(loginData: LoginUserDto) {
         const { email, password } = loginData;
-    
+        
         const user = await this.prisma.user.findUnique({
           where: {
             email,
@@ -113,7 +113,7 @@ export class UsersService {
         });
 
         if (!userExists) {
-            throw new Error("User doesn't exists.");
+            throw new NotFoundException("User doesn't exists.");
         }
 
         return await this.prisma.user.update({
@@ -132,11 +132,11 @@ export class UsersService {
         });
       
         if (!user) {
-          throw new Error("User doesn't exist.");
+          throw new NotFoundException("User doesn't exist.");
         }
       
         if (user.status === "disabled") {
-          throw new Error("User is already disabled or deleted.");
+          throw new NotFoundException("User is already disabled or deleted.");
         }
       
         return await this.prisma.user.update({
