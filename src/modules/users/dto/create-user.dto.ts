@@ -1,6 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsNotEmpty, IsEmail, MinLength, MaxLength, ValidateIf, IsEmpty } from 'class-validator';
-import { IsRequiredIfAdministrator } from 'src/modules/common/validators/isRequiredAdministrator';
+import { IsString, IsNotEmpty, IsEmail, MinLength, MaxLength, IsEmpty, Validate, ValidateIf } from 'class-validator';
 
 export class CreateUserDto {
     @ApiProperty()
@@ -34,5 +33,4 @@ export class CreateUserDto {
       message: 'The area field is required when type is set to administrator.',
     })
     area: string;
-
 }

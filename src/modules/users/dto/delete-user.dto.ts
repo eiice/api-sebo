@@ -2,5 +2,11 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class DeleteUserDto {
   @ApiProperty()
-  currentPassword: string;
+  email: string
+
+  @ApiProperty()
+  password: string;
+
+  @ApiProperty()
+  status: string;
 }

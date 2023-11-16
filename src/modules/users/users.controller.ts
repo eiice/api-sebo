@@ -1,60 +1,80 @@
-import { Controller, Post, Body, Get, Put, Param, Delete, ValidationPipe } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  Get,
+  Put,
+  Param,
+  Delete,
+  ValidationPipe,
+  UseGuards,
+  Request
+} from '@nestjs/common';
+import { ApiResponse } from '@nestjs/swagger';
 import { UsersService } from './users.service';
+import { UserEntity } from './entity/users.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { IsPublic } from '../auth/decorators/is-public.decorator';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { DeleteUserDto } from './dto/delete-user.dto';
-import { LoginUserDto } from './dto/login-user.dto';
-import { get } from 'http';
-import { ApiResponse } from '@nestjs/swagger';
+import { CurrentUser } from '../auth/decorators/current-user.decorator';
+import { UserFromJwt } from '../auth/models/UserFromJwt';
 
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
-
+  
   @Post('signup')
-  @ApiResponse({type: CreateUserDto, isArray: true})
-  async create(@Body(new ValidationPipe({ transform: true })) data: CreateUserDto) {
-    return this.usersService.create(data);
-  }
-
-  @Post('login')
-  async login(@Body() data: LoginUserDto) {
-    return this.usersService.login(data);
-  }
-
+  @IsPublic()
+  @ApiResponse({ type: CreateUserDto, isArray: true })
+  async create(
+    @Body(new ValidationPipe({ transform: true })) data: CreateUserDto,
+    ) {
+        return this.usersService.create(data);
+    }
+    
+  @UseGuards(JwtAuthGuard)
   @Get()
   async findAll() {
-    return this.usersService.findAll();
-  }
+      return this.usersService.findAll();
+    }
+    
+  @UseGuards(JwtAuthGuard)
+  @ApiResponse({ type: UpdateUserDto, isArray: true })
+  @Put()
+  async update(@Body() data: UpdateUserDto) {
+      return this.usersService.update(data);
+    }
 
-  @Put(':id')
-  async update(@Param('id') id: string, @Body() data: UpdateUserDto) {
-    return this.usersService.update(id, data);
-  }
-
-  @Delete(':id')
-  async delete(@Param('id') id: string, @Body() data: DeleteUserDto) {
-    return this.usersService.delete(id, data);
-  }
+    @UseGuards(JwtAuthGuard)
+    @ApiResponse({ type: UpdateUserDto, isArray: true })
+    @Delete()
+  async delete(@Body() data: DeleteUserDto) {
+      return this.usersService.delete(data);
+    }
 }
 
-
-@Controller('admin') 
+@Controller('admin')
 export class AdminController {
     constructor(private readonly usersService: UsersService) {}
-
-    @Post('login')
-    async login(@Body() data: LoginUserDto) {
-      return this.usersService.loginAdmin(data);
-    }
-
-    @Get('reports')
-    async reports() {
-        return this.usersService.adminGetReports();
-    }
-
-    @Get('users')
-    async getUsers() {
-        return this.usersService.adminGetUsers();
-    }
+    
+    @UseGuards(JwtAuthGuard)
+  @Get('reports')
+  async reports() {
+      return this.usersService.adminGetReports();
+  }
+  
+  @UseGuards(JwtAuthGuard)
+  @Get('users')
+  async getUsers() {
+    return this.usersService.adminGetUsers();
+  }
+  
+//   @UseGuards(JwtAuthGuard)
+//   @Get('profile')
+//   getProfile(@CurrentUser() currentUser: UserFromJwt) {
+//     return "Current user id: " + currentUser.id;
+//   }
 }
+

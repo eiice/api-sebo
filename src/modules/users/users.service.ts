@@ -1,149 +1,125 @@
-import { ConflictException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
-import { PrismaService } from 'src/database/PrismaService';
-import { CreateUserDto } from './dto/create-user.dto';
+import {
+  ConflictException,
+  Injectable,
+  NotAcceptableException,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
+
+import { Prisma } from '@prisma/client';
+import { PrismaService } from '../prisma/prisma.service';
 import * as bcrypt from 'bcrypt';
-import { Prisma, User } from '@prisma/client';
+import { IsRequiredIfAdministrator } from 'src/common/validators/isRequiredIfAdministrator';
+import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { DeleteUserDto } from './dto/delete-user.dto';
-import { LoginUserDto } from './dto/login-user.dto';
 
 @Injectable()
 export class UsersService {
+  isAdminValidation: IsRequiredIfAdministrator;
 
-    constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) {
+    this.isAdminValidation = new IsRequiredIfAdministrator();
+  }
 
-    
-    async create(createUserDto: CreateUserDto) {
+  async create(createUserDto: CreateUserDto) {
+    const userExists = await this.prisma.user.findUnique({
+      where: {
+        email: createUserDto.email,
+      },
+    });
 
-        const userExists = await this.prisma.user.findUnique({
-            where: {
-                email: createUserDto.email,
-            }
-        });
-
-        if (userExists) {
-            throw new ConflictException('User already exists.');
-        }
-
-        const data: Prisma.UserCreateInput = {
-            ...createUserDto,
-            password: await bcrypt.hash(createUserDto.password, 10),
-            status: "active"
-        };
-
-        const user = await this.prisma.user.create({
-            data,
-        }); 
-
-        return user;
+    if (userExists) {
+      throw new ConflictException('User already exists.');
     }
 
+    const data: Prisma.UserCreateInput = {
+      ...createUserDto,
+      password: await bcrypt.hash(createUserDto.password, 10),
+      status: 'active',
+    };
 
-    async login(loginData: LoginUserDto) {
-        const { email, password } = loginData;
-        
-        const user = await this.prisma.user.findUnique({
-          where: {
-            email,
-          },
-        });
+    const user = await this.prisma.user.create({
+      data,
+    });
 
-        if (!user) {
-            throw new NotFoundException('User not found');
-        }
+    return user;
+  }
 
-        if (user.type == 'administrator') {
-            throw new UnauthorizedException('You should login by the admin area');
-        }
-    
-        const isPasswordValid = await bcrypt.compare(password, user.password);
-    
-        if (!isPasswordValid) {
-          throw new UnauthorizedException('Invalid password');
-        }
-    
-        return "User Auth Completed!";
+  async findOneByEmail(usernameEmail: string) {
+    const userWithEmail = await this.prisma.user.findUnique({
+      where: {
+        email: usernameEmail,
+      },
+    });
+
+    return userWithEmail;
+  }
+
+  async findAll() {
+    return this.prisma.user.findMany();
+  }
+
+  async update(updateUserDto: UpdateUserDto) {
+    const user = await this.findOneByEmail(updateUserDto.email);
+  
+    if (!user.password) {
+        throw new UnauthorizedException('')
     }
 
-    async loginAdmin(loginData: LoginUserDto) {
-        const { email, password } = loginData;
-    
-        const user = await this.prisma.user.findUnique({
-          where: {
-            email,
-          },
-        });
-
-        if (!user) {
-            throw new NotFoundException('User not found');
-        }
-      
-        if (user.type == 'administrator') {
-
-              const isPasswordValid = await bcrypt.compare(password, user.password);
-          
-              if (!isPasswordValid) {
-                throw new UnauthorizedException('Invalid password');
-              }
-          
-              return "Admin Auth Completed!";
-        }
-        
-        return "You don't have permission to access this area";
-
+    if (!user) {
+      throw new NotFoundException('User not found');
     }
-
-    async adminGetUsers() {
-        return this.prisma.user.findMany();
-    }
-
-    async adminGetReports() {
-        return "Reports.";
-    }
-
-    async findAll() {
-        return this.prisma.user.findMany();
-    }
-
-    async update(id: string, data: UpdateUserDto) {
-        const userExists = await this.prisma.user.findUnique({
-            where: {
-                id,
-            },
-        });
-
-        if (!userExists) {
-            throw new NotFoundException("User doesn't exists.");
-        }
-
-        return await this.prisma.user.update({
-            data, 
-            where: { 
-                id,
-            },
-        });
-    }
-
-    async delete(id: string, data: DeleteUserDto) {
-        const user = await this.prisma.user.findUnique({
-          where: {
-            id,
-          },
-        });
-      
-        if (!user) {
-          throw new NotFoundException("User doesn't exist.");
-        }
-      
-        if (user.status === "disabled") {
-          throw new NotFoundException("User is already disabled or deleted.");
-        }
-      
-        return await this.prisma.user.update({
-          where: {
-            id,
-          },
-          data: { status: "disabled" },
-        });
+  
+    return await this.prisma.user.update({
+      where: {
+        email: updateUserDto.email,
+      },
+      data: {
+        ...updateUserDto,
+        password: updateUserDto.password ? await bcrypt.hash(updateUserDto.password, 10) : undefined
       }
+    });
+  }
+
+  async delete(deleteUserDto: DeleteUserDto) {
+    const { email, password } = deleteUserDto
+    const user = await this.findOneByEmail(email);
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+
+    if (!user || !isPasswordValid) {
+      throw new NotFoundException("Invalid e-mail or password.");
+    }
+
+    if (user.status === 'disabled') {
+      throw new NotFoundException('User is already disabled or deleted.');
+    }
+
+    return await this.prisma.user.update({
+      where: {
+        email: user.email,
+      },
+      data: { 
+        ...deleteUserDto,
+        status: 'disabled' 
+      },
+    });
+  }
+
+  async findById(id: string) {
+    return this.prisma.user.findUnique({
+        where: {
+            id
+        }
+    })
+  }
+
+
+  async adminGetUsers() {
+    return this.prisma.user.findMany();
+  }
+
+  async adminGetReports() {
+    return 'Reports.';
+  }
 }

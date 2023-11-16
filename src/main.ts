@@ -4,17 +4,17 @@ import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common/pipes';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
-  app.useGlobalPipes(new ValidationPipe({ transform: true }));
-  const config = new DocumentBuilder()
-    .setTitle('API Sebo')
-    .setDescription('Documentação da API do Sebo')
-    .setVersion('1.0')
-    .addTag('sebo')
-    .build();
-  const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('/', app, document);
+    const app = await NestFactory.create(AppModule);
+    app.useGlobalPipes(new ValidationPipe({ transform: true }));
+    const config = new DocumentBuilder()
+        .setTitle('API Sebo')
+        .setDescription('Documentação da API do Sebo')
+        .setVersion('1.0')
+        .addTag('sebo')
+        .build();
+    const document = SwaggerModule.createDocument(app, config);
+    SwaggerModule.setup('/', app, document);
 
-  await app.listen(3000);
+    await app.listen(3000);
 }
 bootstrap();
