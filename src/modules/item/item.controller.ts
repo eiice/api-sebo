@@ -43,7 +43,7 @@ export class ItemController {
 
   @UseGuards(JwtAuthGuard)
   @Delete(':id')
-  remove(@Param('id') id: string) {
+  delete(@Param('id') id: string) {
     return this.itemService.delete(id);
   }
 }
