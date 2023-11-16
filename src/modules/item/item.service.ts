@@ -60,7 +60,13 @@ export class ItemService {
   }
 
   async update(id: string, updateItemDto: UpdateItemDto) {
-    return this.prisma.item.update({
+    if (updateItemDto.category) {
+        if ( (await this.categoryService.getAllActiveCategoryNames()).includes(updateItemDto.category) === false) {
+            throw new UnauthorizedException('Category does not exists.');
+        }  
+    }
+
+    const userUpdate =  this.prisma.item.update({
         where: {
             id
         },
@@ -68,6 +74,14 @@ export class ItemService {
             ...updateItemDto
         }
     });
+
+    if (!userUpdate) {
+        throw new UnauthorizedError('Update is not in the correct format.')
+    }
+
+    return userUpdate;
+
+    
   }
 
   async delete(id: string) {
