@@ -61,7 +61,7 @@ export class ItemService {
 
   async update(id: string, updateItemDto: UpdateItemDto) {
     if (updateItemDto.category) {
-        if ( !(await this.categoryService.getAllActiveCategoryNames()).includes(updateItemDto.category) ) {
+        if ( (await this.categoryService.getAllActiveCategoryNames()).includes(updateItemDto.category) === false) {
             throw new UnauthorizedException('Category does not exists.');
         }  
     }
