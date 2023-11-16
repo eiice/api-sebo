@@ -70,11 +70,6 @@ export class AdminController {
   async getUsers() {
     return this.usersService.adminGetUsers();
   }
-  
-//   @UseGuards(JwtAuthGuard)
-//   @Get('profile')
-//   getProfile(@CurrentUser() currentUser: UserFromJwt) {
-//     return "Current user id: " + currentUser.id;
-//   }
+
 }
 
