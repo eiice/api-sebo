@@ -5,12 +5,18 @@ import { UpdateItemDto } from './dto/update-item.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { UserFromJwt } from '../auth/models/UserFromJwt';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
+import { ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ItemEntity } from './entities/item.entity';
 
 @Controller('item')
+@ApiTags('item')
 export class ItemController {
   constructor(private readonly itemService: ItemService) {}
 
   @UseGuards(JwtAuthGuard)
+  @ApiResponse({ 
+    type: ItemEntity
+  })
   @Post()
   create(@Body(new ValidationPipe({ transform: true })) createItemDto: CreateItemDto, @CurrentUser() currentUser: UserFromJwt) {
     return this.itemService.create(createItemDto, currentUser);

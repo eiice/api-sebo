@@ -10,7 +10,7 @@ import {
   UseGuards,
   Request
 } from '@nestjs/common';
-import { ApiResponse } from '@nestjs/swagger';
+import { ApiResponse, ApiTags } from '@nestjs/swagger';
 import { UsersService } from './users.service';
 import { UserEntity } from './entity/users.entity';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -22,6 +22,7 @@ import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { UserFromJwt } from '../auth/models/UserFromJwt';
 
 @Controller('users')
+@ApiTags('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
   
@@ -56,6 +57,7 @@ export class UsersController {
 }
 
 @Controller('admin')
+@ApiTags('admin')
 export class AdminController {
     constructor(private readonly usersService: UsersService) {}
     

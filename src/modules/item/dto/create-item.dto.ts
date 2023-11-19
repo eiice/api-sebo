@@ -3,6 +3,9 @@ import { IsEmpty, IsNumber, IsString } from "class-validator";
 
 
 export class CreateItemDto {
+    @IsEmpty()
+    @ApiProperty()
+    id: string
     @IsString()
     @ApiProperty()
     title: string;
@@ -22,7 +25,7 @@ export class CreateItemDto {
     @ApiProperty()
     status: string;
     @IsEmpty()
-    @ApiProperty({type: 'string', format: 'date'})
+    @ApiProperty({type: 'string', format: 'date', required: false})
     creationDate: string
     @IsString()
     @ApiProperty()

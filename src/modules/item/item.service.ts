@@ -7,11 +7,15 @@ import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { UserFromJwt } from '../auth/models/UserFromJwt';
 import { CategoryService } from '../category/category.service';
 import { UnauthorizedError } from '../auth/errors/unauthorized.error';
+import { UserEntity } from '../users/entity/users.entity';
+import { ApiCreatedResponse } from '@nestjs/swagger';
+import { ItemEntity } from './entities/item.entity';
 
 @Injectable()
 export class ItemService {
   constructor(private prisma: PrismaService, private categoryService: CategoryService) {}
 
+  @ApiCreatedResponse({ type: ItemEntity })
   async create(createItemDto: CreateItemDto, @CurrentUser() currentUser: UserFromJwt) {
     if ( (await this.categoryService.getAllActiveCategoryNames()).includes(createItemDto.category) ) {
         return this.prisma.item.create({

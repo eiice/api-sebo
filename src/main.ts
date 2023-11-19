@@ -8,8 +8,9 @@ async function bootstrap() {
     app.useGlobalPipes(new ValidationPipe({ transform: true }));
     const config = new DocumentBuilder()
         .setTitle('API Sebo')
-        .setDescription('Documentação da API do Sebo')
-        .setVersion('1.0')
+        .setDescription(
+            'Documentação da API do Sebo. <br><br> Considerações: com exeções dos endpoints "/users/signup" e "users/login", a header request de autorização deverá ser especificada através de: Key = Authorization, Value: Bearer "insira_o_token_jwt_gerado_aqui". ')
+        .setVersion('1.3')
         .addTag('sebo')
         .build();
     const document = SwaggerModule.createDocument(app, config);

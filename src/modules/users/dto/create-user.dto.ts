@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { Item } from '@prisma/client';
 import { IsString, IsNotEmpty, IsEmail, MinLength, MaxLength, IsEmpty, Validate, ValidateIf } from 'class-validator';
 
 export class CreateUserDto {
@@ -33,4 +34,7 @@ export class CreateUserDto {
       message: 'The area field is required when type is set to administrator.',
     })
     area: string;
+    @IsEmpty()
+    @ApiProperty()
+    items: Item
 }

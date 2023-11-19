@@ -1,5 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { User } from "@prisma/client";
+import { Item, User } from "@prisma/client";
 
 export class UserEntity implements User {
     @ApiProperty()
@@ -16,4 +16,6 @@ export class UserEntity implements User {
     type: string;
     @ApiProperty( { required: false, nullable: true } )
     area: string | null;
+    @ApiProperty()
+    items: Item
 }

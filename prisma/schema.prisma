@@ -18,7 +18,7 @@ model User {
 }
 
 model Item {
-    id           String @id @default(uuid())
+    id           String  @id @default(uuid())
     title        String
     author       String
     category     String
@@ -35,4 +35,13 @@ model Category {
     name        String
     description String
     status      String
+}
+
+model Transaction {
+    id               String @id @default(uuid())
+    sellerId         String
+    buyerId          String
+    itemId           String
+    creationDate     String
+    transactionValue Int
 }
